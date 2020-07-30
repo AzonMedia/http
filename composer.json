@@ -1,0 +1,27 @@
+{
+    "name": "azonmedia/http",
+    "type": "library",
+    "description": "HTTP library",
+    "keywords": ["http"],
+    "homepage": "https://github.com/AzonMedia/http",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vesko Kenashkov",
+            "email": "kenashkov@azonmedia.com",
+            "homepage": "http://azonmedia.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.0",
+        "azonmedia/components": "dev-master",
+        "azonmedia/exceptions": "dev-master",
+        "azonmedia/translator": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Azonmedia\\Http\\": "src/"
+        }
+    }
+}

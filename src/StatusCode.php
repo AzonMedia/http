@@ -16,7 +16,7 @@ namespace Azonmedia\Http;
 
 /**
  * Class StatusCode
- * @package Guzaba2\Http
+ * @package Azonmedia\Http
  */
 abstract class StatusCode
 {

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Azonmedia\Http;
 
 use Azonmedia\Exceptions\InvalidArgumentException;
+use Azonmedia\Exceptions\RunTimeException;
 use Azonmedia\Translator\Translator as t;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class Method
@@ -82,5 +84,21 @@ abstract class Method
         $method = strtoupper($method);
         $key = array_search($method, self::METHODS_MAP, true);
         return $key === false ? false : true;
+    }
+
+    /**
+     * Returns the method constant as per self::METHODS_MAP.
+     * @param ServerRequestInterface $Requst
+     * @return int
+     * @throws InvalidArgumentException
+     * @throws RunTimeException
+     */
+    public static function get_method_constant(ServerRequestInterface $Requst): int
+    {
+        $method_const = array_search(strtoupper($Requst->getMethod()), Method::METHODS_MAP);
+        if ($method_const === FALSE) {
+            throw new RunTimeException(sprintf(t::_('The provided request contains a method %1$s that is not found in the Method::METHODS_MAP.'), $Requst->getMethod()));
+        }
+        return $method_const;
     }
 }

@@ -21,7 +21,9 @@ class Str implements StreamInterface
     /**
      * @var string
      */
-    protected $string = '';
+    protected $str = '';
+
+    protected bool $is_read_flag = false;
 
     /**
      * Will be lowered when the processing is over
@@ -31,7 +33,8 @@ class Str implements StreamInterface
 
     protected $is_readable_flag = true;
 
-    protected $is_seekable_flag = true;
+    //TODO - make it seekable
+    protected $is_seekable_flag = false;
 
     protected const DEFAULT_DOCTYPE = '<!doctype html>';
 
@@ -95,7 +98,7 @@ class Str implements StreamInterface
     {
         $this->is_writable_flag = false;
         $this->is_readable_flag = false;
-        $this->stream = null;
+        $this->str = null;
 
         return null;
     }
@@ -107,7 +110,7 @@ class Str implements StreamInterface
      */
     public function getSize(): ?int
     {
-        $size = strlen($this->string);
+        $size = strlen($this->str);
         return $size;
     }
 
@@ -119,7 +122,7 @@ class Str implements StreamInterface
      */
     public function tell(): int
     {
-        if (($position = ftell($this->stream)) === false) {
+        if (($position = ftell($this->str)) === false) {
             throw new RunTimeException(t::_('Can not retrieve the position of the pointer in the stream.'));
         }
         return $position;
@@ -132,7 +135,7 @@ class Str implements StreamInterface
      */
     public function eof(): bool
     {
-        return feof($this->stream);
+        return $this->is_read_flag;
     }
 
     /**
@@ -160,7 +163,7 @@ class Str implements StreamInterface
      */
     public function seek(/* int */ $offset, /* int */ $whence = SEEK_SET)
     {
-        if (!$this->isSeekable() || fseek($this->stream, $offset, $whence)) {
+        if (!$this->isSeekable() || fseek($this->str, $offset, $whence)) {
             throw new RunTimeException(t::_('Can not seek this stream.'));
         }
     }
@@ -202,11 +205,11 @@ class Str implements StreamInterface
     public function write(/* string */ $string)
     {
         //there is no need to use Swoole\Coroutine\System::fwrite() as it is a memory stream (and also fwrite cant be used with memory stream)
-        //if (!$this->isWritable() || ($size = fwrite($this->stream, $string)) === false) {
+        //if (!$this->isWritable() || ($size = fwrite($this->str, $string)) === false) {
         if (!$this->isWritable()) { // Swoole\Coroutine::fwrite(): cannot represent a stream of type MEMORY as a select()able descriptor
             throw new RuntimeException('Can not write to this stream.');
         }
-        $this->string .= $string;
+        $this->str .= $string;
         $size = strlen($string);
         return $size;
     }
@@ -233,10 +236,11 @@ class Str implements StreamInterface
      */
     public function read(/* int */ $length)
     {
-        if (!$this->isReadable() || ($str = fread($this->stream, $length)) === false) {
+        if (!$this->isReadable() ) {
             throw new RuntimeException(t::_('Can not read from this stream.'));
         }
-        return $str;
+        $this->is_read_flag = true;
+        return $this->str;
     }
 
     /**
@@ -251,7 +255,7 @@ class Str implements StreamInterface
         if (!$this->isReadable()) {
             throw new RuntimeException(t::_('Can not get the contents of this stream.'));
         }
-        $contents = $this->string;
+        $contents = $this->str;
         return $contents;
     }
 
@@ -269,7 +273,7 @@ class Str implements StreamInterface
      */
     public function getMetadata(/* ?string */ $key = null)
     {
-        $meta = stream_get_meta_data($this->stream);
+        $meta = stream_get_meta_data($this->str);
         if (is_null($key) === true) {
             return $meta;
         }

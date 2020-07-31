@@ -92,7 +92,6 @@ class Uri implements UriInterface
         $user = '',
         $password = ''
     ) {
-        parent::__construct();
         $this->scheme = $scheme ? $this->filterScheme($scheme) : '';
         $this->host = $host;
         $this->port = $port ? $this->filterPort($port) : null;

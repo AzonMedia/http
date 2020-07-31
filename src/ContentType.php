@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Azonmedia\Http;
 
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -76,7 +77,7 @@ abstract class ContentType
         return $ret;
     }
 
-    public static function get_content_type_from_request(ServerRequestInterface $Request): ?string
+    public static function get_content_type_from_message(MessageInterface $Request): ?string
     {
         $ret = null;
         $content_type_headers = $Request->getHeader('Accept');

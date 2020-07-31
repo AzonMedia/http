@@ -352,7 +352,23 @@ abstract class Message implements MessageInterface
      * Uses the Headers to retrieve this.
      * @return string|null
      */
-    abstract public function getContentType(): ?string;
+    /**
+     * {@inheritDoc}
+     * @return string|null
+     */
+    public function getContentType(): ?string
+    {
+//        $ret = null;
+//        $content_type_headers = $this->getHeader('Accept');
+//        foreach ($content_type_headers as $content_type_header) {
+//            $ret = ContentType::get_content_type($content_type_header);
+//            if ($ret) {
+//                break;
+//            }
+//        }
+//        return $ret;
+        return ContentType::get_content_type_from_message($this);
+    }
 
     /**
      * {@inheritDoc}

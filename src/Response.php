@@ -124,21 +124,4 @@ class Response extends Message implements ResponseInterface
             throw new InvalidArgumentException(sprintf(t::_('Invalid HTTP status code %s provided.'), $status));
         }
     }
-
-    /**
-     * {@inheritDoc}
-     * @return string|null
-     */
-    public function getContentType(): ?string
-    {
-        $ret = null;
-        $content_type_headers = $this->getHeader('Content-Type');
-        foreach ($content_type_headers as $content_type_header) {
-            $ret = ContentType::get_content_type($content_type_header);
-            if ($ret) {
-                break;
-            }
-        }
-        return $ret;
-    }
 }

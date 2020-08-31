@@ -117,10 +117,10 @@ class Structured implements StreamInterface
     public function getSize(): ?int
     {
         //$size = count($this->structure);
-        if (is_iterable($this->structure)) {
-            $size = iterator_count($this->structure);
-        } else {
+        if (is_array($this->structure)) {
             $size = count($this->structure);
+        } else {
+            $size = iterator_count($this->structure);
         }
         return $size;
     }

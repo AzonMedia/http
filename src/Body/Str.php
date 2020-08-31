@@ -161,7 +161,7 @@ class Str implements StreamInterface
      */
     public function seek(/* int */ $offset, /* int */ $whence = SEEK_SET)
     {
-        if (!$this->isSeekable() || fseek($this->str, $offset, $whence)) {
+        if (!$this->isSeekable() ) {
             throw new RunTimeException(t::_('Can not seek this stream.'));
         }
         if ($whence !== SEEK_SET) {
@@ -217,6 +217,7 @@ class Str implements StreamInterface
         //return $size;
         $this->str = substr($this->str, 0, $this->position);//this effectively chops the string (thus it is possible to shorten it)
         $this->str .= $string;
+        $this->position += strlen($string);
         return strlen($string);
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Azonmedia\Http\Body;
 
+use Azonmedia\Exceptions\InvalidArgumentException;
 use Azonmedia\Exceptions\RunTimeException;
 use Psr\Http\Message\StreamInterface;
 use Azonmedia\Translator\Translator as t;
@@ -23,7 +24,8 @@ class Str implements StreamInterface
      */
     protected $str = '';
 
-    protected bool $is_read_flag = false;
+    //protected bool $is_read_flag = false;
+    protected int $position = 0;
 
     /**
      * Will be lowered when the processing is over
@@ -33,8 +35,7 @@ class Str implements StreamInterface
 
     protected $is_readable_flag = true;
 
-    //TODO - make it seekable
-    protected $is_seekable_flag = false;
+    protected $is_seekable_flag = true;
 
     protected const DEFAULT_DOCTYPE = '<!doctype html>';
 
@@ -122,10 +123,7 @@ class Str implements StreamInterface
      */
     public function tell(): int
     {
-        if (($position = ftell($this->str)) === false) {
-            throw new RunTimeException(t::_('Can not retrieve the position of the pointer in the stream.'));
-        }
-        return $position;
+        return $this->position;
     }
 
     /**
@@ -135,7 +133,7 @@ class Str implements StreamInterface
      */
     public function eof(): bool
     {
-        return $this->is_read_flag;
+        return $this->position === $this->getSize();
     }
 
     /**
@@ -166,6 +164,10 @@ class Str implements StreamInterface
         if (!$this->isSeekable() || fseek($this->str, $offset, $whence)) {
             throw new RunTimeException(t::_('Can not seek this stream.'));
         }
+        if ($whence !== SEEK_SET) {
+            throw new InvalidArgumentException(sprintf(t::_('The %1$s() supports only SEEK_SET for the whence parameter.'), __METHOD__ ));
+        }
+        $this->position = $offset;
     }
 
     /**
@@ -183,6 +185,7 @@ class Str implements StreamInterface
         if (!$this->isSeekable()) {
             throw new RuntimeException(t::_('Can not rewind this stream.'));
         }
+        $this->position = 0;
     }
 
     /**
@@ -209,9 +212,12 @@ class Str implements StreamInterface
         if (!$this->isWritable()) { // Swoole\Coroutine::fwrite(): cannot represent a stream of type MEMORY as a select()able descriptor
             throw new RuntimeException('Can not write to this stream.');
         }
+        //$this->str .= $string;
+        //$size = strlen($string);
+        //return $size;
+        $this->str = substr($this->str, 0, $this->position);//this effectively chops the string (thus it is possible to shorten it)
         $this->str .= $string;
-        $size = strlen($string);
-        return $size;
+        return strlen($string);
     }
 
     /**
@@ -239,8 +245,15 @@ class Str implements StreamInterface
         if (!$this->isReadable() ) {
             throw new RuntimeException(t::_('Can not read from this stream.'));
         }
-        $this->is_read_flag = true;
-        return $this->str;
+        //$this->is_read_flag = true;
+        //return $this->str;
+        $end = $this->position + $length;
+        if ($this->position + $length > strlen($this->str)) {
+            $end = strlen($this->str);
+        }
+        $contents = substr($this->str, $this->position, $end);
+        $this->position = $end;
+        return $contents;
     }
 
     /**
@@ -255,7 +268,9 @@ class Str implements StreamInterface
         if (!$this->isReadable()) {
             throw new RuntimeException(t::_('Can not get the contents of this stream.'));
         }
-        $contents = $this->str;
+        //$contents = $this->str;
+        $contents = substr($this->str, $this->position);
+        $this->position = strlen($this->str);
         return $contents;
     }
 

@@ -77,14 +77,27 @@ abstract class ContentType
         return $ret;
     }
 
-    public static function get_content_type_from_message(MessageInterface $Request): ?string
+    /**
+     * Returns the content type from the provided message.
+     * Checks the Accept (for requests) and Content-Type headers (for responses)
+     * @param MessageInterface $Message
+     * @return string|null
+     */
+    public static function get_content_type_from_message(MessageInterface $Message): ?string
     {
         $ret = null;
-        $content_type_headers = $Request->getHeader('Accept');
+        $acccept_headers = $Message->getHeader('Accept');
+        foreach ($acccept_headers as $accept_header) {
+            $ret = ContentType::get_content_type($accept_header);
+            if ($ret) {
+                return $ret;
+            }
+        }
+        $content_type_headers = $Message->getHeader('Content-Type');
         foreach ($content_type_headers as $content_type_header) {
             $ret = ContentType::get_content_type($content_type_header);
             if ($ret) {
-                break;
+                return $ret;
             }
         }
         return $ret;

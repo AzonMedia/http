@@ -76,7 +76,7 @@ class Stream implements StreamInterface
         return $ret;
     }
 
-    public function __sleep(): void
+    public function __sleep(): array
     {
         throw new RunTimeException(sprintf(t::_('The class %1$s can not be serialized.'), __CLASS__));
     }
